@@ -1,105 +1,120 @@
-Fintech Fraud Detection – SQL Project
+# Fintech Fraud Detection – SQL Project
 
-This project focuses on identifying suspicious financial transactions using SQL.
-It simulates a simple fraud-detection model similar to what payment platforms use to catch unusual behavior.
+This project explores how SQL can be used to detect suspicious financial transactions.  
+It includes several fraud-detection rules frequently used in payment systems and shows how analytic techniques such as window functions and statistical calculations can reveal unusual behavior.
 
-The project includes a small database with users, cards, merchants, and transaction history.
-On top of this data, I applied several fraud-detection rules using SQL window functions, statistical calculations, and geo-based checks.
+The project uses a small, simulated dataset containing users, cards, merchants, and transaction history.
 
-The goal of the project is to show how SQL can be used to detect risky transactions without any machine-learning model—just data logic and analytical techniques.
+---
 
-1. Dataset & Structure
+## 📌 1. Project Structure
 
-The database contains the following tables:
+| File | Description |
+|------|-------------|
+| `01_schema_and_sample_data.sql` | Creates database tables + inserts sample data |
+| `02_velocity_fraud.sql` | Detects transactions done too close in time |
+| `03_insert_velocity_alerts.sql` | Saves velocity fraud alerts |
+| `04_location_fraud.sql` | Detects impossible travel / suspicious geo-change |
+| `05_insert_location_alerts.sql` | Saves location fraud alerts |
+| `06_high_amount_fraud.sql` | Detects unusually high transaction amounts |
+| `07_insert_high_amount_alerts.sql` | Saves high-amount fraud alerts |
+| `README.md` | Project documentation |
 
-users – basic user info
+---
 
-cards – cards linked to each user
+## 📌 2. Database Tables
 
-merchants – merchant/location info
+The project uses the following tables:
 
-transactions – all payment activity (main table)
+- **users** – user information  
+- **cards** – card details linked to users  
+- **merchants** – merchant and category info  
+- **transactions** – all payment activity  
+- **device_info** – device and login details  
+- **fraud_alerts** – stores detected fraud cases  
 
-device_info – device data (not heavily used in this version)
+---
 
-fraud_alerts – table where detected alerts are stored
+## 📌 3. Implemented Fraud Rules
 
-Each script is stored in a separate file and can be run independently.
+### 🔹 3.1 Velocity Fraud  
+Detects users who make multiple transactions within a very short time window (e.g., 5 minutes).
 
-2. Fraud Rules Implemented
+Key techniques:  
+- `LAG()`  
+- Time difference calculation  
+- Window functions  
 
-The project currently includes three core fraud rules, which are also very common in real payment systems.
+**Example output:**
+```sql
+SELECT * FROM fraud_alerts WHERE alert_type = 'velocity_fraud';
 
-1) Velocity Fraud
+🔹 3.2 Location Change Fraud
 
-Checks whether a user makes more than one transaction within a very short time window (e.g., 5 minutes).
-This helps catch bots or card numbers being used repeatedly by fraudsters.
+Identifies “impossible travel” scenarios:
+e.g., Istanbul → New York in 10 minutes.
 
-Techniques used:
-LAG(), time differences, window functions.
+Techniques:
 
-Script: 02_velocity_fraud.sql
-Insert rule: 03_insert_velocity_alerts.sql
+LAG() for previous location
 
-2) Location Change Fraud
+Simple geo-distance formula
 
-Detects “impossible travel” situations.
-If a user suddenly makes a transaction from a location that is too far from their previous one (and the time gap is too short), it is flagged as suspicious.
+Time difference comparison
 
-Example:
-A user pays in Istanbul and then a few minutes later a transaction appears in New York.
+🔹 3.3 High Amount Outlier Fraud
 
-Techniques used:
-LAG(), simple geo-distance calculation, time comparison.
+Finds transactions that do not match the user’s normal spending pattern.
 
-Script: 04_location_fraud.sql
-Insert rule: 05_insert_location_alerts.sql
+Outlier rule used:
 
-3) High-Amount Outlier Fraud
+amount > avg_amount + 3 * stddev_amount
 
-Looks for transactions that are unusually high compared to a user's normal spending pattern.
-Outliers are measured using average amount and standard deviation.
 
-Example:
-A user who usually spends around 50 suddenly makes a 4000 payment.
+Key techniques:
 
-Techniques used:
-AVG(), STDDEV(), window functions, outlier rule.
+AVG()
 
-Script: 06_high_amount_fraud.sql
-Insert rule: 07_insert_high_amount_alerts.sql
+STDDEV()
 
-3. Files in This Project
+Window functions
+
+📌 4. How to Run the Project
+
+Run the schema + data script:
+
 01_schema_and_sample_data.sql
+
+
+Run each analysis script to view suspicious activity:
+
 02_velocity_fraud.sql
-03_insert_velocity_alerts.sql
 04_location_fraud.sql
-05_insert_location_alerts.sql
 06_high_amount_fraud.sql
+
+
+Insert fraud cases into fraud_alerts:
+
+03_insert_velocity_alerts.sql
+05_insert_location_alerts.sql
 07_insert_high_amount_alerts.sql
-README.md
 
-4. How to Use the Project
 
-Run 01_schema_and_sample_data.sql to create the schema and load the example data.
-
-Run each analysis script (02, 04, 06) to view the suspicious transactions.
-
-Run the insert scripts (03, 05, 07) to write detected frauds into the fraud_alerts table.
-
-Query the results:
+View all fraud alerts:
 
 SELECT * FROM fraud_alerts ORDER BY created_at DESC;
 
-5. Notes
+```
+📌 5. Notes
 
-This project is for learning and demonstration purposes.
+This project is created for learning and demonstration purposes.
 
-The fraud rules are simplified but follow real-life patterns used in fintech.
+The dataset is fictional but represents realistic fraud patterns used in fintech systems.
 
-More rules (merchant anomalies, device mismatch, etc.) can be added later if needed.
+Additional fraud rules (merchant anomaly, device mismatch, spending pattern changes, etc.) can be added in the future if needed.
 
-6. Contact
+📌 6. Contact
 
-If you have feedback or ideas to extend the project, feel free to reach out.
-This project will probably grow over time as I continue learning advanced SQL and data analysis.
+I’m open to feedback, ideas and suggestions.
+This project will continue to grow as I keep improving my SQL and data analytics skills.
+
