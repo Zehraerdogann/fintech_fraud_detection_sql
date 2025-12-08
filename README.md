@@ -1,120 +1,102 @@
-# Fintech Fraud Detection – SQL Project
+[README_updated.md](https://github.com/user-attachments/files/24029356/README_updated.md)
+# Fintech Fraud Detection – SQL Case Study
+A KPI-focused SQL project designed to detect suspicious financial activity using window functions, statistical rules, and anomaly-detection logic.
 
-This project explores how SQL can be used to detect suspicious financial transactions.  
-It includes several fraud-detection rules frequently used in payment systems and shows how analytic techniques such as window functions and statistical calculations can reveal unusual behavior.
+## 1. Key Fraud KPIs
+| KPI | Description | Why It Matters |
+| --- | ----------- | -------------- |
+| Velocity Fraud Rate | Very fast repeated transactions | Indicates bots or rapid unauthorized use |
+| Location Mismatch Frequency | Sudden impossible travel | Strong sign of Account Takeover (ATO) |
+| High-Amount Outlier Rate | Transactions above statistical threshold | Detects stolen card usage |
+| Avg User Spend | Baseline spending pattern per user | Used for outlier detection |
+| Time-To-Detect Fraud (TTD) | Time until fraud becomes visible | Lower TTD reduces total loss |
 
-The project uses a small, simulated dataset containing users, cards, merchants, and transaction history.
-
----
-
-## 📌 1. Project Structure
-
-| File | Description |
-|------|-------------|
-| `01_schema_and_sample_data.sql` | Creates database tables + inserts sample data |
-| `02_velocity_fraud.sql` | Detects transactions done too close in time |
-| `03_insert_velocity_alerts.sql` | Saves velocity fraud alerts |
-| `04_location_fraud.sql` | Detects impossible travel / suspicious geo-change |
-| `05_insert_location_alerts.sql` | Saves location fraud alerts |
-| `06_high_amount_fraud.sql` | Detects unusually high transaction amounts |
-| `07_insert_high_amount_alerts.sql` | Saves high-amount fraud alerts |
-| `README.md` | Project documentation |
-
----
-
-## 📌 2. Database Tables
-
-The project uses the following tables:
-
-- **users** – user information  
-- **cards** – card details linked to users  
-- **merchants** – merchant and category info  
-- **transactions** – all payment activity  
-- **device_info** – device and login details  
-- **fraud_alerts** – stores detected fraud cases  
-
----
-
-## 📌 3. Implemented Fraud Rules
-
-### 🔹 3.1 Velocity Fraud  
-Detects users who make multiple transactions within a very short time window (e.g., 5 minutes).
-
-Key techniques:  
-- `LAG()`  
-- Time difference calculation  
-- Window functions  
-
-**Example output:**
-```sql
-SELECT * FROM fraud_alerts WHERE alert_type = 'velocity_fraud';
-
-🔹 3.2 Location Change Fraud
-
-Identifies “impossible travel” scenarios:
-e.g., Istanbul → New York in 10 minutes.
-
-Techniques:
-
-LAG() for previous location
-
-Simple geo-distance formula
-
-Time difference comparison
-
-🔹 3.3 High Amount Outlier Fraud
-
-Finds transactions that do not match the user’s normal spending pattern.
-
-Outlier rule used:
-
-amount > avg_amount + 3 * stddev_amount
-
-
-Key techniques:
-
-AVG()
-
-STDDEV()
-
-Window functions
-
-📌 4. How to Run the Project
-
-Run the schema + data script:
-
-01_schema_and_sample_data.sql
-
-
-Run each analysis script to view suspicious activity:
-
-02_velocity_fraud.sql
-04_location_fraud.sql
-06_high_amount_fraud.sql
-
-
-Insert fraud cases into fraud_alerts:
-
-03_insert_velocity_alerts.sql
-05_insert_location_alerts.sql
-07_insert_high_amount_alerts.sql
-
-
-View all fraud alerts:
-
-SELECT * FROM fraud_alerts ORDER BY created_at DESC;
-
+## 2. Project Structure
 ```
-📌 5. Notes
+fintech_fraud_detection/
+├── 01_schema_and_sample_data.sql
+├── 02_velocity_fraud.sql
+├── 03_insert_velocity_alerts.sql
+├── 04_location_fraud.sql
+├── 05_insert_location_alerts.sql
+├── 06_high_amount_fraud.sql
+├── 07_insert_high_amount_alerts.sql
+└── README.md
+```
 
-This project is created for learning and demonstration purposes.
+## 3. Database Tables
+- users
+- cards
+- merchants
+- transactions
+- device_info
+- fraud_alerts
 
-The dataset is fictional but represents realistic fraud patterns used in fintech systems.
+## 4. Fraud Rules & SQL Logic
 
-Additional fraud rules (merchant anomaly, device mismatch, spending pattern changes, etc.) can be added in the future if needed.
+### 4.1 Velocity Fraud
+```sql
+SELECT *
+FROM fraud_alerts
+WHERE alert_type = 'velocity_fraud';
+```
 
-📌 6. Contact
+### 4.2 Location Change Fraud
+Detects suspicious geo-change events.
 
-I’m open to feedback, ideas and suggestions.
-This project will continue to grow as I keep improving my SQL and data analytics skills.
+### 4.3 High-Amount Outlier Fraud
+```sql
+amount > avg_amount + 3 * stddev_amount
+```
 
+## 5. Business Recommendations
+
+### 1. Real-Time Velocity Blocking  
+Implement automated controls that flag accounts performing multiple high-speed transactions.  
+- Enforce step-up verification (SMS, biometric check).  
+- Temporarily freeze transactions until user confirmation.  
+- Reduce average fraud loss by catching bots early.  
+
+### 2. Geo-Verification & Location Risk Scoring  
+When a transaction originates from an unusual or high-risk country:  
+- Introduce mandatory secondary authentication.  
+- Compare device fingerprint with previous sessions.  
+- Use a geolocation risk model that assigns scores based on past fraud data.  
+
+### 3. Dynamic, User-Level Spending Limits  
+Replace static transaction limits with statistically generated thresholds:  
+- Normal spending = mean ± standard deviation.  
+- High-risk transactions require confirmation or delay.  
+- Reduces false positives while protecting high-value customers.  
+
+### 4. Device-Risk Scoring Integration  
+Each device should have its own risk profile:  
+- New, unrecognized devices trigger alerts.  
+- Jailbroken/rooted devices receive higher risk scores.  
+- Combine device metadata with transaction velocity for better accuracy.  
+
+### 5. Fraud Alert Prioritization Framework  
+Not all alerts have equal risk. Build a ranking system:  
+- **High Priority:** Impossible travel + high amount + new device.  
+- **Medium Priority:** Velocity anomalies with consistent device usage.  
+- **Low Priority:** Minor deviations from typical patterns.  
+
+### 6. Behavioral Profiling & Long-Term Monitoring  
+Monitor long-term user behavior to detect subtle fraud changes:  
+- Spending pattern deviation.  
+- Merchant-type anomalies.  
+- Time-of-day transaction shifts.  
+
+### 7. Automated Analyst Dashboard  
+Develop a real-time dashboard showing:  
+- Top KPIs (velocity rate, high-amount rate, ATO risk).  
+- Daily fraud trends.  
+- High-risk user segments.  
+This supports rapid investigation and reduces manual workload.
+
+## 6. Why This Project Matters
+Demonstrates SQL expertise, fraud pattern understanding, KPI-driven analysis, and business-thinking.
+A strong portfolio piece for fintech, fraud analytics, and risk intelligence roles.
+
+## 7. Contact
+Open to comments, improvements, and collaboration.
